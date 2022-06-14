@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BookStore.DAO;
+using BookStore.Domain;
+
 namespace BookStore.Controllers;
 
 [ApiController]
@@ -11,16 +13,24 @@ public class BookController : ControllerBase
 
 
     [HttpGet(Name = "GetBook")]
-        // [Route("/book/obj")]
-        // public Book GetObj()
-        // {
-        //     // return 
-        //     // return book;
-        // }
+        [Route("/home")]
+        public IEnumerable<Book> GetBookList()
+        {
+            var book = bookDAO.SelectAll();
+            // remove range
+            return Enumerable.Range(1, 5).Select(index => new Book
+            {
+                id = Int32.Parse(book["id"]),
+                name = book["name"],
+                year = book["year"],
+                author = book["author"]
+            })
+            .ToArray();
+        }
         [Route("/book/info")]
         public IActionResult Get()
         {   
-            var book = bookDAO.SelectByName("Lobo da Estepe");
+            var book = bookDAO.SelectByName("Sidarta");
             return Ok(book.ToString());
         }
 }

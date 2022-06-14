@@ -31,7 +31,7 @@ public class BookDAO
         }
         query += query + ")";
 
-        if (bookDAOConn.OpenConnection() == true)
+        if (bookDAOConn.OpenConnection())
         {
             bookDAOConn.ExecuteCommand(query);
             Log.Information("New book inserted successfully");
@@ -116,6 +116,7 @@ public class BookDAO
             //Read the data and store them in the list
             while (dataReader.Read())
             {
+                bookFields["id"] =  dataReader["id"] + "";
                 bookFields["name"] = dataReader["name"].ToString() + "";
                 bookFields["year"] = dataReader["year"].ToString() + "";
                 bookFields["author"] = dataReader["author"].ToString() + "";

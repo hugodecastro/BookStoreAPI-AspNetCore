@@ -1,6 +1,12 @@
 using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+var appBuilder = WebApplication.CreateBuilder(args);
+
+var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
+
+IConfigurationRoot configuration = builder.Build();
 
 // Add services to the container.
 
@@ -9,12 +15,17 @@ using var log = new LoggerConfiguration()
             .WriteTo.Console()
             .CreateLogger();
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+appBuilder.Services.AddControllers();
 
-var app = builder.Build();
+appBuilder.Services.AddRazorPages();
+appBuilder.Services.AddLogging();
+appBuilder.Services.AddHttpClient();
+appBuilder.Services.AddConnections();
+
+appBuilder.Services.AddEndpointsApiExplorer();
+appBuilder.Services.AddSwaggerGen();
+
+var app = appBuilder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -1,18 +1,23 @@
 using MySql.Data.MySqlClient;
 using Serilog;
+
 namespace BookStore.DAO;
 
-public class DbConnection 
+public class DbConnection
 {
-    private const String ConnectionString = "Server=db;Database=Codurance;Uid=root;Pwd=root;Keepalive=10;";
+    private const String ConnectionString = "Server=localhost;" + 
+                                            "Database=Codurance;" + 
+                                            "Port=3306;" + 
+                                            "Uid=root;" + 
+                                            "Pwd=A@dmin2345;";
     private MySqlConnection connection = new MySqlConnection(ConnectionString);
-    
+
     //open connection to database
     public bool OpenConnection()
     {
         try
         {
-            this.connection.OpenAsync();
+            connection.Open();
             return true;
         }
         catch (MySqlException ex)
