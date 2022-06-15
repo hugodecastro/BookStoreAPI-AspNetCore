@@ -1,17 +1,19 @@
 namespace BookStore.Domain;
 
-public class Book
+public class Book : IProduct
 {
-    public int id { get; set; }
+    public int Id { get; set; }
 
-    public string? name { get; set; }
+    public string? Name { get; set; }
 
-    public string? year{ get; set; }
+    public string? Year{ get; set; }
 
-    public string? author { get; set; }
+    public string? Author { get; set; }
+
+    public string? Type { get; set; }
 
     public override string ToString()
    {
-      return "Livro de id=" + id + " de nome=" + name + "\ne autor=" + author + " foi publicado no ano=" + year;
+      return "Livro de id=" + Id + " de nome=" + Name + "\ne autor=" + Author + " foi publicado no ano=" + Year;
    }
 }
