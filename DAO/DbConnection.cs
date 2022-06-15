@@ -5,11 +5,7 @@ namespace BookStore.DAO;
 
 public class DbConnection
 {
-    private const String ConnectionString = "Server=localhost;" + 
-                                            "Database=Codurance;" + 
-                                            "Port=3306;" + 
-                                            "Uid=root;" + 
-                                            "Pwd=A@dmin2345;";
+    private const String ConnectionString = "";
     private MySqlConnection connection = new MySqlConnection(ConnectionString);
 
     //open connection to database
