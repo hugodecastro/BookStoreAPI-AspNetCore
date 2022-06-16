@@ -8,13 +8,12 @@ namespace BookStore.DAO;
 
 public class BookDAO : IProductDAO<Book>
 {
-    private const string Tablename = "books";
     private List<Book> booksList = new List<Book>();
     // Instance responsible for dealing with DB Connections
     DbConnection? bookDAOConn;
     
     //Insert statement
-    public void Insert(string[] args)
+    public void Insert(int productCategoryMapId, string[] args)
     {
         /// <summary>
         /// Insert new book.
@@ -23,7 +22,9 @@ public class BookDAO : IProductDAO<Book>
         /// <returns>This method returns nothing.</returns>
 
         bookDAOConn = new DbConnection();
-        string query = $"INSERT INTO {Tablename} VALUES(";
+        string query = $"INSERT INTO {Constants.BooksTableName} " + 
+                        "(ProductCategoryMapId, YearPublished, Author) " +
+                        $"VALUES({productCategoryMapId},";
 
         foreach(string field in args)
         {
@@ -62,7 +63,13 @@ public class BookDAO : IProductDAO<Book>
         }
         bookDAOConn = new DbConnection();
         var regex = new Regex(Regex.Escape("0"));
-        string query = $"UPDATE {Tablename} SET name='0', year='0', author='0' WHERE name={name}";
+        string query = $"UPDATE {Constants.BooksTableName} b" + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " +
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " + 
+                       $"RIGHT JOIN {Constants.ProductsTableName} p " +
+                       "ON p.ProductId = pcm.ProductId " +
+                       "SET p.ProductName='0', b.YearPublished='0', b.Author='0' " +
+                       $"WHERE p.ProductName={name}";
 
         foreach(string field in args)
         {
@@ -91,7 +98,12 @@ public class BookDAO : IProductDAO<Book>
         /// <param name="name">Name of the book to be deleted.</param>
         /// <returns>This method returns nothing.</returns>
 
-        string query = $"DELETE FROM {Tablename} WHERE name='{name}'";
+        string query = $"DELETE FROM {Constants.BooksTableName} " + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " +
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
+                       $"RIGHT JOIN {Constants.ProductsTableName} p " +
+                       "ON p.ProductId = pcm.ProductId " +
+                       $"WHERE p.ProductName='{name}'";
         bookDAOConn = new DbConnection();
 
         if (bookDAOConn.OpenConnection())
@@ -205,7 +217,7 @@ public class BookDAO : IProductDAO<Book>
         /// </summary>
         /// <returns>Total amount of books.</returns>
 
-        string query = $"SELECT COUNT(*) FROM {Tablename}";
+        string query = $"SELECT COUNT(*) FROM {Constants.BooksTableName}";
         int Count = -1;
         bookDAOConn = new DbConnection();
 

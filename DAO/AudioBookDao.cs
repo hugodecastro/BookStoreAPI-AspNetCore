@@ -4,7 +4,7 @@ namespace BookStore.DAO;
 
 public class AudioBookDAO : IProductDAO<AudioBook>
 {
-    public void Insert(string[] args)
+    public void Insert(int productCategoryMapId, string[] args)
     {
         /// <summary>
         /// Insert new audio book.
