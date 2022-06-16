@@ -20,8 +20,8 @@ public class ReservationDAO
 
         reservationDAOConn = new DbConnection();
         string query = $"INSERT INTO {Constants.ReservationsTableName} " + 
-                        "(ProductId, Date, Status) " +
-                        $"VALUES({productId}, {DateTime.Now.ToString(@"MM\/dd\/yyyy")}, TRUE)";
+                        "(ProductId, ReservationDate, ReservationStatus) " +
+                        $"VALUES({productId}, '{DateTime.Now.ToString(@"MM\/dd\/yyyy")}', TRUE)";
         
         if(reservationDAOConn.OpenConnection())
         {
@@ -78,8 +78,8 @@ public class ReservationDAO
                 Reservation reservation = new Reservation();
                 reservation.ReservationId = (int) dataReader["ReservationId"];
                 reservation.ProductId = (int) dataReader["ProductId"];
-                reservation.Date = dataReader["Date"].ToString() + "";
-                reservation.Status = (bool) dataReader["Status"];
+                reservation.Date = dataReader["ReservationDate"].ToString() + "";
+                reservation.Status = (bool) dataReader["ReservationStatus"];
                 reservationsList.Add(reservation);
             }
 
@@ -92,12 +92,12 @@ public class ReservationDAO
         return reservationsList;
     } 
 
-    public Dictionary<string, string> SelectByProductName(string productName)
+    public Dictionary<string, string> SelectByProductId(int ProductId)
     {
         /// <summary>
         /// Select reservation by product name.
         /// </summary>
-        /// <param name="productName">Name of the product reserved.</param>
+        /// <param name="ProductId">Id of the product reserved.</param>
         /// <returns>Dictionary of the composed reservation and product name.</returns>
 
         Dictionary<string, string> reservation  = new Dictionary<string, string>()
@@ -108,11 +108,11 @@ public class ReservationDAO
             {"status", ""}
         };
         reservationDAOConn = new DbConnection();
-        string query = "SELECT r.ReservationId, p.ProductName, r.ReservationDate, r.ReservationStatus" +
-                       $"FROM {Constants.ReservationsTableName} r" +
-                       $"LEFT JOIN {Constants.ProductsTableName} p" +
-                       "ON r.ProductId = p.ProductId" +
-                       $"WHERE p.ProductName={productName}";
+        string query = "SELECT r.ReservationId, p.ProductName, r.ReservationDate, r.ReservationStatus " +
+                       $"FROM {Constants.ReservationsTableName} r " +
+                       $"LEFT JOIN {Constants.ProductsTableName} p " +
+                       "ON r.ProductId = p.ProductId " +
+                       $"WHERE p.ProductId='{ProductId}'";
 
         if (reservationDAOConn.OpenConnection())
         {

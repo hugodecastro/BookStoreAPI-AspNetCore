@@ -70,7 +70,7 @@ public class BookDAO : IProductDAO<Book>
                        $"RIGHT JOIN {Constants.ProductsTableName} p " +
                        "ON p.ProductId = pcm.ProductId " +
                        "SET p.ProductName='0', b.YearPublished='0', b.Author='0' " +
-                       $"WHERE p.ProductName={name}";
+                       $"WHERE p.ProductName='{name}'";
 
         foreach(string field in args)
         {
@@ -130,15 +130,15 @@ public class BookDAO : IProductDAO<Book>
 
         bookDAOConn = new DbConnection();
         Book book = new Book();
-        string query = "SELECT p.ProductId, p.ProductName, b.Year, b.Author" +
-                       $"FROM {Constants.ProductsTableName} p" + 
-                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm" + 
-                       "ON p.ProductId = pcm.ProductCategoryMapId" + 
-                       $"RIGHT JOIN {Constants.BooksTableName} b" + 
-                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId" +
-                       $"RIGHT JOIN {Constants.CategoriesTableName} c" + 
-                       "ON c.CategoryId = pcm.CategoryId" +
-                       $"WHERE p.ProductName = {name}" + 
+        string query = "SELECT p.ProductId, p.ProductName, b.YearPublished, b.Author " +
+                       $"FROM {Constants.ProductsTableName} p " + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " + 
+                       "ON p.ProductId = pcm.ProductCategoryMapId " + 
+                       $"RIGHT JOIN {Constants.BooksTableName} b " + 
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
+                       $"RIGHT JOIN {Constants.CategoriesTableName} c " + 
+                       "ON c.CategoryId = pcm.CategoryId " +
+                       $"WHERE p.ProductName = '{name}' " + 
                        "AND c.CategoryId = 1;";
 
         if (bookDAOConn.OpenConnection())
