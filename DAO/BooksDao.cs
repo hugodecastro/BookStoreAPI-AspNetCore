@@ -18,7 +18,7 @@ public class BookDAO : IProductDAO<Book>
         /// <summary>
         /// Insert new book.
         /// </summary>
-        /// <param name="args">List of fields to be updated.</param>
+        /// <param name="args">List of fields to be inserted.</param>
         /// <returns>This method returns nothing.</returns>
 
         bookDAOConn = new DbConnection();
@@ -55,11 +55,12 @@ public class BookDAO : IProductDAO<Book>
         /// <param name="args">List of fields to be updated.</param>
         /// <param name="name">Name of the book to be updated.</param>
         /// <returns>This method returns nothing.</returns>
+        /// <raises>MissingFieldException</raises>
 
         //#TODO flexibilize numbers of arguments to update
         if(args.Count < 3)
         {
-            throw new Exception("Missing value to update!");
+            throw new MissingFieldException("Missing value to update!");
         }
         bookDAOConn = new DbConnection();
         var regex = new Regex(Regex.Escape("0"));
@@ -69,7 +70,7 @@ public class BookDAO : IProductDAO<Book>
                        $"RIGHT JOIN {Constants.ProductsTableName} p " +
                        "ON p.ProductId = pcm.ProductId " +
                        "SET p.ProductName='0', b.YearPublished='0', b.Author='0' " +
-                       $"WHERE p.ProductName={name}";
+                       $"WHERE p.ProductName='{name}'";
 
         foreach(string field in args)
         {
@@ -129,15 +130,15 @@ public class BookDAO : IProductDAO<Book>
 
         bookDAOConn = new DbConnection();
         Book book = new Book();
-        string query = "SELECT p.ProductName, b.Year, b.Author" +
-                       $"FROM {Constants.ProductsTableName} p" + 
-                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm" + 
-                       "ON p.ProductId = pcm.ProductCategoryMapId" + 
-                       $"RIGHT JOIN {Constants.BooksTableName} b" + 
-                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId" +
-                       $"RIGHT JOIN {Constants.CategoriesTableName} c" + 
-                       "ON c.CategoryId = pcm.CategoryId" +
-                       $"WHERE p.ProductName = {name}" + 
+        string query = "SELECT p.ProductId, p.ProductName, b.YearPublished, b.Author " +
+                       $"FROM {Constants.ProductsTableName} p " + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " + 
+                       "ON p.ProductId = pcm.ProductCategoryMapId " + 
+                       $"RIGHT JOIN {Constants.BooksTableName} b " + 
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
+                       $"RIGHT JOIN {Constants.CategoriesTableName} c " + 
+                       "ON c.CategoryId = pcm.CategoryId " +
+                       $"WHERE p.ProductName = '{name}' " + 
                        "AND c.CategoryId = 1;";
 
         if (bookDAOConn.OpenConnection())
@@ -150,6 +151,7 @@ public class BookDAO : IProductDAO<Book>
             //Read the data and store them in the list
             while (dataReader.Read())
             {
+                book.ProductId = (int) dataReader["ProductId"];
                 book.Name = dataReader["ProductName"].ToString() + "";
                 book.Year = dataReader["YearPublished"].ToString() + "";
                 book.Author = dataReader["Author"].ToString() + "";
@@ -172,7 +174,7 @@ public class BookDAO : IProductDAO<Book>
         /// <returns>List of books.</returns>
 
         bookDAOConn = new DbConnection();
-        string query = "SELECT p.ProductName, b.YearPublished, b.Author " +
+        string query = "SELECT p.ProductId, p.ProductName, b.YearPublished, b.Author " +
                        $"FROM {Constants.ProductsTableName} p " + 
                        $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " + 
                        "ON p.ProductId = pcm.ProductCategoryMapId " + 
@@ -194,6 +196,7 @@ public class BookDAO : IProductDAO<Book>
             while (dataReader.Read())
             {
                 Book book = new Book();
+                book.ProductId = (int) dataReader["ProductId"];
                 book.Name = dataReader["ProductName"].ToString() + "";
                 book.Year = dataReader["YearPublished"].ToString() + "";
                 book.Author = dataReader["Author"].ToString() + "";
@@ -209,31 +212,8 @@ public class BookDAO : IProductDAO<Book>
         return booksList;
     }
 
-    //Count statement
-    public int Count()
+    public int ProductCount()
     {
-        /// <summary>
-        /// Count all books.
-        /// </summary>
-        /// <returns>Total amount of books.</returns>
-
-        string query = $"SELECT COUNT(*) FROM {Constants.BooksTableName}";
-        int Count = -1;
-        bookDAOConn = new DbConnection();
-
-        //Open Connection
-        if (bookDAOConn.OpenConnection())
-        {
-            //Create Mysql Command
-            MySqlCommand cmd = bookDAOConn.GetCommand(query);
-
-            //ExecuteScalar will return one value
-            Count = int.Parse(cmd.ExecuteScalar()+"");
-            
-            //close Connection
-            bookDAOConn.CloseConnection();
-        }
-
-        return Count;
+        return CommonQueries.Count(Constants.BooksTableName);
     }
 }
