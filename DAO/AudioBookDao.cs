@@ -38,7 +38,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         throw new NotImplementedException();
     }
 
-    public List<AudioBook> SelectAll()
+    public List<AudioBook> SelectAllProductsInfo()
     {
         /// <summary>
         /// Select all audio books.
@@ -48,7 +48,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         throw new NotImplementedException();
     }
 
-    public AudioBook SelectByName(string name)
+    public AudioBook SelectProductInfoByName(string name)
     {
         /// <summary>
         /// Select audio book by name.

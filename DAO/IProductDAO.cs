@@ -5,7 +5,7 @@ public interface IProductDAO<T>
     void Insert(string[] args);
     void UpdateByName(List<string> args, string name);
     void Delete(string name);
-    List<T> SelectAll();
-    T SelectByName(string name);
+    T SelectProductInfoByName(string name);
+    List<T> SelectAllProductsInfo();
     int Count();
 }

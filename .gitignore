@@ -9,6 +9,8 @@
 .devcontainer
 .env
 appsettings.*
+Properties/
+*.sql
 
 # Build results
 

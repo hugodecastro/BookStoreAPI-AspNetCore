@@ -14,10 +14,9 @@ public class ProductController : ControllerBase
 
     [HttpGet(Name = "GetProduct")]
     [Route("/home")]
-    public IEnumerable<IProduct> GetProductList()
+    public IEnumerable<Product> GetProductList()
     {
-        List<Book> bookList = productDAO.SelectAll(); 
-        // remove range
+        List<Book> bookList = productDAO.SelectAllProductsInfo();
         return bookList.ToArray();
     }
 }
