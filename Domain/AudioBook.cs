@@ -1,8 +1,8 @@
 namespace BookStore.Domain;
 
-public class AudioBook : IProduct
+public class AudioBook : Product
 {
-    public int Id { get; set; }
-    public string? Name { get; set; }
-    public string? Type { get; set; }
+    public int AudioBookId { get; set; }
+    public int Duracao { get; set; }
+
 }
