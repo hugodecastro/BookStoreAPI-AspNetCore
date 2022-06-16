@@ -2,14 +2,13 @@ using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
 using Serilog;
 using BookStore.Domain;
-using System.Linq;
 
 namespace BookStore.DAO;
 
-public class BookDAO
+public class BookDAO : IProductDAO<Book>
 {
     private const string Tablename = "Books";
-    private Dictionary<string, string> bookFields = new Dictionary<string, string>();
+    private List<Book> booksList = new List<Book>();
     // Instance responsible for dealing with DB Connections
     DbConnection? bookDAOConn;
     
@@ -31,7 +30,7 @@ public class BookDAO
         }
         query += query + ")";
 
-        if (bookDAOConn.OpenConnection() == true)
+        if (bookDAOConn.OpenConnection())
         {
             bookDAOConn.ExecuteCommand(query);
             Log.Information("New book inserted successfully");
@@ -85,6 +84,12 @@ public class BookDAO
     //Delete statement
     public void Delete(string name)
     {
+        /// <summary>
+        /// Delete book by name.
+        /// </summary>
+        /// <param name="name">Name of the book to be deleted.</param>
+        /// <returns>This method returns nothing.</returns>
+
         string query = $"DELETE FROM {Tablename} WHERE name='{name}'";
         bookDAOConn = new DbConnection();
 
@@ -101,8 +106,13 @@ public class BookDAO
     }
 
     //Select statement
-    public Dictionary<string, string> SelectAll()
+    public List<Book> SelectAll()
     {
+        /// <summary>
+        /// Select all books.
+        /// </summary>
+        /// <returns>List of books.</returns>
+
         string query = $"SELECT * FROM {Tablename}";
         bookDAOConn = new DbConnection();
 
@@ -116,9 +126,12 @@ public class BookDAO
             //Read the data and store them in the list
             while (dataReader.Read())
             {
-                bookFields["name"] = dataReader["name"].ToString() + "";
-                bookFields["year"] = dataReader["year"].ToString() + "";
-                bookFields["author"] = dataReader["author"].ToString() + "";
+                Book book = new Book();
+                book.Id = (int) dataReader["id"];
+                book.Name = dataReader["name"].ToString() + "";
+                book.Year = dataReader["year"].ToString() + "";
+                book.Author = dataReader["author"].ToString() + "";
+                booksList.Add(book);
             }
 
             //close Data Reader
@@ -128,11 +141,17 @@ public class BookDAO
             
         }
         
-        return bookFields;
+        return booksList;
     }
 
     public Book SelectByName(string name)
     {
+        /// <summary>
+        /// Select book by name.
+        /// </summary>
+        /// <param name="name">Name of the book to be selected.</param>
+        /// <returns>Book</returns>
+
         Book book = new Book();
         bookDAOConn = new DbConnection();
         string query = $"SELECT * FROM {Tablename} WHERE name='{name}'";
@@ -145,10 +164,10 @@ public class BookDAO
 
             while (dataReader.Read())
             {
-                book.id = (int) dataReader["id"];
-                book.name = dataReader["name"].ToString() + "";
-                book.year = dataReader["year"].ToString() + "";
-                book.author = dataReader["author"].ToString() + "";
+                book.Id = (int) dataReader["id"];
+                book.Name = dataReader["name"].ToString() + "";
+                book.Year = dataReader["year"].ToString() + "";
+                book.Author = dataReader["author"].ToString() + "";
             }
 
             dataReader.Close();
@@ -160,7 +179,12 @@ public class BookDAO
     //Count statement
     public int Count()
     {
-        string query = "SELECT COUNT(*) FROM Books";
+        /// <summary>
+        /// Count all books.
+        /// </summary>
+        /// <returns>Total amount of books.</returns>
+
+        string query = $"SELECT COUNT(*) FROM {Tablename}";
         int Count = -1;
         bookDAOConn = new DbConnection();
 
