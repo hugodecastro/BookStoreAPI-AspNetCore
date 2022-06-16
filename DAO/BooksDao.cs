@@ -2,18 +2,18 @@ using MySql.Data.MySqlClient;
 using System.Text.RegularExpressions;
 using Serilog;
 using BookStore.Domain;
+using BookStore.Util;
 
 namespace BookStore.DAO;
 
 public class BookDAO : IProductDAO<Book>
 {
-    private const string Tablename = "Books";
     private List<Book> booksList = new List<Book>();
     // Instance responsible for dealing with DB Connections
     DbConnection? bookDAOConn;
     
     //Insert statement
-    public void Insert(string[] args)
+    public void Insert(int productCategoryMapId, string[] args)
     {
         /// <summary>
         /// Insert new book.
@@ -22,7 +22,9 @@ public class BookDAO : IProductDAO<Book>
         /// <returns>This method returns nothing.</returns>
 
         bookDAOConn = new DbConnection();
-        string query = $"INSERT INTO {Tablename} VALUES(";
+        string query = $"INSERT INTO {Constants.BooksTableName} " + 
+                        "(ProductCategoryMapId, YearPublished, Author) " +
+                        $"VALUES({productCategoryMapId},";
 
         foreach(string field in args)
         {
@@ -61,7 +63,13 @@ public class BookDAO : IProductDAO<Book>
         }
         bookDAOConn = new DbConnection();
         var regex = new Regex(Regex.Escape("0"));
-        string query = $"UPDATE {Tablename} SET name='0', year='0', author='0' WHERE name={name}";
+        string query = $"UPDATE {Constants.BooksTableName} b" + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " +
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " + 
+                       $"RIGHT JOIN {Constants.ProductsTableName} p " +
+                       "ON p.ProductId = pcm.ProductId " +
+                       "SET p.ProductName='0', b.YearPublished='0', b.Author='0' " +
+                       $"WHERE p.ProductName={name}";
 
         foreach(string field in args)
         {
@@ -69,7 +77,7 @@ public class BookDAO : IProductDAO<Book>
             query = regex.Replace(query, field, 1);
         }
  
-        if (bookDAOConn.OpenConnection() == true)
+        if (bookDAOConn.OpenConnection())
         {
             bookDAOConn.ExecuteCommand(query);
             Log.Information("Book updated successfully!");
@@ -90,10 +98,15 @@ public class BookDAO : IProductDAO<Book>
         /// <param name="name">Name of the book to be deleted.</param>
         /// <returns>This method returns nothing.</returns>
 
-        string query = $"DELETE FROM {Tablename} WHERE name='{name}'";
+        string query = $"DELETE FROM {Constants.BooksTableName} " + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " +
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
+                       $"RIGHT JOIN {Constants.ProductsTableName} p " +
+                       "ON p.ProductId = pcm.ProductId " +
+                       $"WHERE p.ProductName='{name}'";
         bookDAOConn = new DbConnection();
 
-        if (bookDAOConn.OpenConnection() == true)
+        if (bookDAOConn.OpenConnection())
         {
             bookDAOConn.ExecuteCommand(query);
             Log.Information($"Book {name} deleted successfully!");
@@ -106,17 +119,71 @@ public class BookDAO : IProductDAO<Book>
     }
 
     //Select statement
-    public List<Book> SelectAll()
+    public Book SelectProductInfoByName(string name)
+    {
+        /// <summary>
+        /// Select book by name.
+        /// </summary>
+        /// <param name="name">Name of the book to be selected.</param>
+        /// <returns>Book</returns>
+
+        bookDAOConn = new DbConnection();
+        Book book = new Book();
+        string query = "SELECT p.ProductName, b.Year, b.Author" +
+                       $"FROM {Constants.ProductsTableName} p" + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm" + 
+                       "ON p.ProductId = pcm.ProductCategoryMapId" + 
+                       $"RIGHT JOIN {Constants.BooksTableName} b" + 
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId" +
+                       $"RIGHT JOIN {Constants.CategoriesTableName} c" + 
+                       "ON c.CategoryId = pcm.CategoryId" +
+                       $"WHERE p.ProductName = {name}" + 
+                       "AND c.CategoryId = 1;";
+
+        if (bookDAOConn.OpenConnection())
+        {
+            //Create Command
+            MySqlCommand cmd = bookDAOConn.GetCommand(query);
+            //Create a data reader and Execute the command
+            MySqlDataReader dataReader = cmd.ExecuteReader();
+            
+            //Read the data and store them in the list
+            while (dataReader.Read())
+            {
+                book.Name = dataReader["ProductName"].ToString() + "";
+                book.Year = dataReader["YearPublished"].ToString() + "";
+                book.Author = dataReader["Author"].ToString() + "";
+            }
+
+            //close Data Reader
+            dataReader.Close();
+
+            bookDAOConn.CloseConnection();
+        }
+        
+        return book;
+    }
+
+    public List<Book> SelectAllProductsInfo()
     {
         /// <summary>
         /// Select all books.
         /// </summary>
         /// <returns>List of books.</returns>
 
-        string query = $"SELECT * FROM {Tablename}";
         bookDAOConn = new DbConnection();
+        string query = "SELECT p.ProductName, b.YearPublished, b.Author " +
+                       $"FROM {Constants.ProductsTableName} p " + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " + 
+                       "ON p.ProductId = pcm.ProductCategoryMapId " + 
+                       $"RIGHT JOIN {Constants.BooksTableName} b " + 
+                       "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
+                       $"RIGHT JOIN {Constants.CategoriesTableName} c " + 
+                       "ON c.CategoryId = pcm.CategoryId " +
+                       "WHERE p.ProductName IS NOT NULL " +
+                       "AND c.CategoryId = 1; ";
 
-        if (bookDAOConn.OpenConnection() == true)
+        if (bookDAOConn.OpenConnection())
         {
             //Create Command
             MySqlCommand cmd = bookDAOConn.GetCommand(query);
@@ -127,10 +194,9 @@ public class BookDAO : IProductDAO<Book>
             while (dataReader.Read())
             {
                 Book book = new Book();
-                book.Id = (int) dataReader["id"];
-                book.Name = dataReader["name"].ToString() + "";
-                book.Year = dataReader["year"].ToString() + "";
-                book.Author = dataReader["author"].ToString() + "";
+                book.Name = dataReader["ProductName"].ToString() + "";
+                book.Year = dataReader["YearPublished"].ToString() + "";
+                book.Author = dataReader["Author"].ToString() + "";
                 booksList.Add(book);
             }
 
@@ -138,42 +204,9 @@ public class BookDAO : IProductDAO<Book>
             dataReader.Close();
 
             bookDAOConn.CloseConnection();
-            
         }
         
         return booksList;
-    }
-
-    public Book SelectByName(string name)
-    {
-        /// <summary>
-        /// Select book by name.
-        /// </summary>
-        /// <param name="name">Name of the book to be selected.</param>
-        /// <returns>Book</returns>
-
-        Book book = new Book();
-        bookDAOConn = new DbConnection();
-        string query = $"SELECT * FROM {Tablename} WHERE name='{name}'";
-
-        if (bookDAOConn.OpenConnection() == true)
-        {
-            MySqlCommand cmd = bookDAOConn.GetCommand(query);
-
-            MySqlDataReader dataReader = cmd.ExecuteReader();
-
-            while (dataReader.Read())
-            {
-                book.Id = (int) dataReader["id"];
-                book.Name = dataReader["name"].ToString() + "";
-                book.Year = dataReader["year"].ToString() + "";
-                book.Author = dataReader["author"].ToString() + "";
-            }
-
-            dataReader.Close();
-            bookDAOConn.CloseConnection();
-        }
-        return book;
     }
 
     //Count statement
@@ -184,12 +217,12 @@ public class BookDAO : IProductDAO<Book>
         /// </summary>
         /// <returns>Total amount of books.</returns>
 
-        string query = $"SELECT COUNT(*) FROM {Tablename}";
+        string query = $"SELECT COUNT(*) FROM {Constants.BooksTableName}";
         int Count = -1;
         bookDAOConn = new DbConnection();
 
         //Open Connection
-        if (bookDAOConn.OpenConnection() == true)
+        if (bookDAOConn.OpenConnection())
         {
             //Create Mysql Command
             MySqlCommand cmd = bookDAOConn.GetCommand(query);
