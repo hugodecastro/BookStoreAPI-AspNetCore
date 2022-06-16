@@ -9,7 +9,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         /// <summary>
         /// Insert new audio book.
         /// </summary>
-        /// <param name="args">List of fields to be updated.</param>
+        /// <param name="args">List of fields to be inserted.</param>
         /// <returns>This method returns nothing.</returns>
 
         throw new NotImplementedException();
@@ -23,6 +23,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         /// <param name="args">List of fields to be updated.</param>
         /// <param name="name">Name of the audio book to be updated.</param>
         /// <returns>This method returns nothing.</returns>
+        /// <raises>MissingFieldException</raises>
 
         throw new NotImplementedException();
     }
@@ -59,7 +60,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         throw new NotImplementedException();
     }
 
-    public int Count()
+    public int ProductCount()
     {
         /// <summary>
         /// Count all audio books.

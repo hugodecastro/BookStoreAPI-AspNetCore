@@ -13,10 +13,16 @@ public class ProductController : ControllerBase
 
 
     [HttpGet(Name = "GetProduct")]
-    [Route("/home")]
-    public IEnumerable<Product> GetProductList()
-    {
-        List<Book> bookList = productDAO.SelectAllProductsInfo();
-        return bookList.ToArray();
-    }
+        [Route("/home")]
+        public IEnumerable<Product> GetProductList()
+        {
+            List<Book> bookList = productDAO.SelectAllProductsInfo();
+            return bookList.ToArray();
+        }
+        [Route("/products/count")]
+        public IActionResult GetProductCount()
+        {
+            int productsCount = productDAO.Count();
+            return Ok(productsCount);
+        }
 }

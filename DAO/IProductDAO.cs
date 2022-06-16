@@ -7,5 +7,5 @@ public interface IProductDAO<T>
     void Delete(string name);
     T SelectProductInfoByName(string name);
     List<T> SelectAllProductsInfo();
-    int Count();
+    int ProductCount();
 }
