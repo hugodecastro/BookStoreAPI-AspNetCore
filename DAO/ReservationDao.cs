@@ -92,27 +92,28 @@ public class ReservationDAO
         return reservationsList;
     } 
 
-    public Dictionary<string, string> SelectByProductId(int ProductId)
+    public Dictionary<string, string> SelectProductByName(string ProductName)
     {
         /// <summary>
         /// Select reservation by product name.
         /// </summary>
-        /// <param name="ProductId">Id of the product reserved.</param>
+        /// <param name="ProductName">Name of the product reserved.</param>
         /// <returns>Dictionary of the composed reservation and product name.</returns>
 
         Dictionary<string, string> reservation  = new Dictionary<string, string>()
         {
-            {"id", ""},
+            {"reservationId", ""},
+            {"productId", ""},
             {"productName", ""},
             {"date", ""},
             {"status", ""}
         };
         reservationDAOConn = new DbConnection();
-        string query = "SELECT r.ReservationId, p.ProductName, r.ReservationDate, r.ReservationStatus " +
+        string query = "SELECT r.ReservationId, p.ProductId, p.ProductName, r.ReservationDate, r.ReservationStatus " +
                        $"FROM {Constants.ReservationsTableName} r " +
                        $"LEFT JOIN {Constants.ProductsTableName} p " +
                        "ON r.ProductId = p.ProductId " +
-                       $"WHERE p.ProductId='{ProductId}'";
+                       $"WHERE p.ProductName LIKE '%{ProductName}%'";
 
         if (reservationDAOConn.OpenConnection())
         {
@@ -124,7 +125,8 @@ public class ReservationDAO
             //Read the data and store them in the list
             while (dataReader.Read())
             {
-                reservation["id"] = dataReader["ReservationId"].ToString() + "";
+                reservation["reservationId"] = dataReader["ReservationId"].ToString() + "";
+                reservation["productId"] = dataReader["ProductId"].ToString() + "";
                 reservation["productName"] = dataReader["ProductName"].ToString() + "";
                 reservation["date"] = dataReader["ReservationDate"].ToString() + "";
                 reservation["status"] = dataReader["ReservationStatus"].ToString() + "";
