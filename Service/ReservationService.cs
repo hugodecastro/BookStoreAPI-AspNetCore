@@ -13,7 +13,7 @@ public class ReservationService
         /// <param name="ProductName">Name of the product to be checked.</param>
         /// <returns>This method returns reservation status.</returns>
 
-        var reservationDic = reservationDAO.SelectProductByName(ProductName);
+        var reservationDic = reservationDAO.SelectProductReservationByName(ProductName);
         bool availability = false;
 
         return bool.TryParse(reservationDic["status"], out availability);
