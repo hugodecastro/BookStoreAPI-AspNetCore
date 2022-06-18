@@ -6,9 +6,9 @@ using BookStore.Util;
 
 namespace BookStore.DAO;
 
-public class BookDAO : IProductDAO<Book>
+public class BookDAO : IProductDAO<Product>
 {
-    private List<Book> booksList = new List<Book>();
+    private List<Product> booksList = new List<Product>();
     // Instance responsible for dealing with DB Connections
     DbConnection? bookDAOConn;
     
@@ -120,7 +120,7 @@ public class BookDAO : IProductDAO<Book>
     }
 
     //Select statement
-    public Book SelectProductInfoByName(string name)
+    public Product SelectProductInfoByName(string name)
     {
         /// <summary>
         /// Select book by name.
@@ -166,7 +166,7 @@ public class BookDAO : IProductDAO<Book>
         return book;
     }
 
-    public List<Book> SelectAllProductsInfo()
+    public List<Product> SelectAllProductsInfo()
     {
         /// <summary>
         /// Select all books.

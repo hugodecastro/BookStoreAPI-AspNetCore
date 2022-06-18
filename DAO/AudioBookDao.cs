@@ -2,7 +2,7 @@ using BookStore.Domain;
 
 namespace BookStore.DAO;
 
-public class AudioBookDAO : IProductDAO<AudioBook>
+public class AudioBookDAO : IProductDAO<Product>
 {
     public void Insert(int productCategoryMapId, string[] args)
     {
@@ -39,7 +39,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         throw new NotImplementedException();
     }
 
-    public List<AudioBook> SelectAllProductsInfo()
+    public List<Product> SelectAllProductsInfo()
     {
         /// <summary>
         /// Select all audio books.
@@ -49,7 +49,7 @@ public class AudioBookDAO : IProductDAO<AudioBook>
         throw new NotImplementedException();
     }
 
-    public AudioBook SelectProductInfoByName(string name)
+    public Product SelectProductInfoByName(string name)
     {
         /// <summary>
         /// Select audio book by name.
