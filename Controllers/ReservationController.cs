@@ -40,7 +40,8 @@ public class ReservationController : ControllerBase
     public IActionResult PostReservation(string ProductName)
     {
         String responseMsg = "";
-        IProductDAO<Product> productDAO = new BookDAO();;
+        IProductDAO<Product> productDAO = Product.getProductDAOFactory("Book") 
+                                            ?? throw new NullReferenceException("Inform a valid product category!");
         ReservationService reservationService = new ReservationService();
 
         if(!reservationService.CheckProductAvailability(ProductName))
