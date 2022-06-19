@@ -25,6 +25,16 @@ appBuilder.Services.AddConnections();
 appBuilder.Services.AddEndpointsApiExplorer();
 appBuilder.Services.AddSwaggerGen();
 
+appBuilder.Services.AddCors(options =>
+    {
+        options.AddPolicy("CorsPolicy",
+            builder => builder
+                .AllowAnyMethod()
+                .AllowCredentials()
+                .SetIsOriginAllowed((host) => true)
+                .AllowAnyHeader());
+    });
+
 var app = appBuilder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,6 +45,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+
+app.UseCors("CorsPolicy");
 
 app.MapControllers();
 

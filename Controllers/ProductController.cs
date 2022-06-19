@@ -9,20 +9,21 @@ namespace BookStore.Controllers;
 public class ProductController : ControllerBase
 {
 
-    private readonly IProductDAO<Book> productDAO = new BookDAO();
+    private readonly IProductDAO<Product> productDAO = Product.getProductDAOFactory("Book") 
+                                            ?? throw new NullReferenceException("Inform a valid product category!");
 
 
     [HttpGet(Name = "GetProduct")]
         [Route("/home")]
         public IEnumerable<Product> GetProductsList()
         {
-            List<Book> bookList = productDAO.SelectAllProductsInfo();
+            List<Product> bookList = productDAO.SelectAllProductsInfo();
             return bookList.ToArray();
         }
         [Route("/product/{ProductName:alpha}")]
         public IActionResult GetProduct(string ProductName)
         {
-            Book book = productDAO.SelectProductInfoByName(ProductName);
+            Book book = (Book) productDAO.SelectProductInfoByName(ProductName);
             return Ok(book);
         }
         [Route("/products/count")]

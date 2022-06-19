@@ -92,17 +92,17 @@ public class ReservationDAO
         return reservationsList;
     } 
 
-    public Dictionary<string, string> SelectByProductId(int ProductId)
+    public Dictionary<string, string> SelectProductReservationByName(string ProductName)
     {
         /// <summary>
         /// Select reservation by product name.
         /// </summary>
-        /// <param name="ProductId">Id of the product reserved.</param>
+        /// <param name="ProductName">Name of the product reserved.</param>
         /// <returns>Dictionary of the composed reservation and product name.</returns>
 
-        Dictionary<string, string> reservation  = new Dictionary<string, string>()
+        Dictionary<string, string> ProductReservation  = new Dictionary<string, string>()
         {
-            {"id", ""},
+            {"reservationId", ""},
             {"productName", ""},
             {"date", ""},
             {"status", ""}
@@ -112,7 +112,7 @@ public class ReservationDAO
                        $"FROM {Constants.ReservationsTableName} r " +
                        $"LEFT JOIN {Constants.ProductsTableName} p " +
                        "ON r.ProductId = p.ProductId " +
-                       $"WHERE p.ProductId='{ProductId}'";
+                       $"WHERE p.ProductName LIKE '%{ProductName}%'";
 
         if (reservationDAOConn.OpenConnection())
         {
@@ -124,10 +124,10 @@ public class ReservationDAO
             //Read the data and store them in the list
             while (dataReader.Read())
             {
-                reservation["id"] = dataReader["ReservationId"].ToString() + "";
-                reservation["productName"] = dataReader["ProductName"].ToString() + "";
-                reservation["date"] = dataReader["ReservationDate"].ToString() + "";
-                reservation["status"] = dataReader["ReservationStatus"].ToString() + "";
+                ProductReservation["reservationId"] = dataReader["ReservationId"].ToString() + "";
+                ProductReservation["productName"] = dataReader["ProductName"].ToString() + "";
+                ProductReservation["date"] = dataReader["ReservationDate"].ToString() + "";
+                ProductReservation["status"] = dataReader["ReservationStatus"].ToString() + "";
             }
 
             //close Data Reader
@@ -135,7 +135,7 @@ public class ReservationDAO
 
             reservationDAOConn.CloseConnection();
         }
-        return reservation;
+        return ProductReservation;
     }
 
     public int ReservationsCount()
