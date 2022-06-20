@@ -5,7 +5,34 @@ namespace BookStore.Util;
 
 public class CommonQueries
 {
-    public static int Count(string tableName)
+    public static string GetProductCategory(string ProductName, DbConnection conn)
+    {
+        string CategoryName = "";
+        string query = "SELECT c.CategoryName " +
+                       $"FROM {Constants.CategoriesTableName} c " + 
+                       $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " +
+                       "ON c.CategoryId = pcm.CategoryId " +
+                       $"RIGHT JOIN {Constants.ProductsTableName} p " +
+                       "ON p.ProductId = pcm.ProductId " +
+                       $"WHERE p.ProductName LIKE '%{ProductName}%';";
+        
+        if (conn.OpenConnection())
+        {
+            
+            MySqlCommand cmd = conn.GetCommand(query);
+         
+            MySqlDataReader dataReader = cmd.ExecuteReader();
+            dataReader.Read();
+            
+            CategoryName = dataReader["CategoryName"].ToString() + "";
+            
+            conn.CloseConnection();
+        }
+
+        return CategoryName;
+    }
+
+    public static int Count(string tableName, DbConnection conn)
     {
         /// <summary>
         /// Count all reservations.
@@ -14,7 +41,6 @@ public class CommonQueries
 
         string query = $"SELECT COUNT(*) FROM {tableName};";
         int Count = -1;
-        DbConnection conn = new DbConnection();
 
         //Open Connection
         if (conn.OpenConnection())

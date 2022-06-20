@@ -28,7 +28,7 @@ public class ReservationController : ControllerBase
             Dictionary<string, string> ProductReservation = reservationDAO.SelectProductReservationByName(ProductName);
             return Ok(ProductReservation);
         }
-        [Route("/reservation/count")]
+        [Route("/reservations/count")]
         public IActionResult GetProductCount()
         {
             int productsCount = reservationDAO.ReservationsCount();
@@ -40,7 +40,7 @@ public class ReservationController : ControllerBase
     public IActionResult PostReservation(string ProductName)
     {
         String responseMsg = "";
-        IProductDAO<Product> productDAO = Product.getProductDAOFactory("Book") 
+        IProductDAO<Product> productDAO = ProductDaoFactory.GetProductDAOFactory(ProductName) 
                                             ?? throw new NullReferenceException("Inform a valid product category!");
         ReservationService reservationService = new ReservationService();
 

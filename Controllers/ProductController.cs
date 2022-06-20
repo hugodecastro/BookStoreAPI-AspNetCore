@@ -9,8 +9,7 @@ namespace BookStore.Controllers;
 public class ProductController : ControllerBase
 {
 
-    private readonly IProductDAO<Product> productDAO = Product.getProductDAOFactory("Book") 
-                                            ?? throw new NullReferenceException("Inform a valid product category!");
+    private readonly IProductDAO<Product> productDAO = ProductDaoFactory.GetBookDAOFactory();
 
 
     [HttpGet(Name = "GetProduct")]

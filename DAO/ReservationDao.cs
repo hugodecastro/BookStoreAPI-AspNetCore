@@ -8,7 +8,7 @@ namespace BookStore.DAO;
 public class ReservationDAO
 {
     private List<Reservation> reservationsList = new List<Reservation>();
-    DbConnection? reservationDAOConn;
+    DbConnection reservationDAOConn = new DbConnection();
 
     public bool Insert(int productId)
     {
@@ -18,7 +18,6 @@ public class ReservationDAO
         /// <param name="productId">Id of the product being reserved.</param>
         /// <returns>This method returns TRUE if insert succeeded else FALSE.</returns>
 
-        reservationDAOConn = new DbConnection();
         string query = $"INSERT INTO {Constants.ReservationsTableName} " + 
                         "(ProductId, ReservationDate, ReservationStatus) " +
                         $"VALUES({productId}, '{DateTime.Now.ToString(@"MM\/dd\/yyyy")}', TRUE)";
@@ -41,7 +40,6 @@ public class ReservationDAO
         /// <param name="status">New status of the reservation.</param>
         /// <returns>This method returns TRUE if update succeeded else FALSE.</returns>
 
-        reservationDAOConn = new DbConnection();
         string query = $"UPDATE {Constants.ReservationsTableName} " + 
                        $"SET Status={status} " +
                        $"WHERE p.ProductId={productId}";
@@ -62,7 +60,6 @@ public class ReservationDAO
         /// </summary>
         /// <returns>List of reservations.</returns>
 
-        reservationDAOConn = new DbConnection();
         string query = $"SELECT * FROM {Constants.ReservationsTableName};";
 
         if (reservationDAOConn.OpenConnection())
@@ -107,7 +104,7 @@ public class ReservationDAO
             {"date", ""},
             {"status", ""}
         };
-        reservationDAOConn = new DbConnection();
+
         string query = "SELECT r.ReservationId, p.ProductName, r.ReservationDate, r.ReservationStatus " +
                        $"FROM {Constants.ReservationsTableName} r " +
                        $"LEFT JOIN {Constants.ProductsTableName} p " +
@@ -121,7 +118,7 @@ public class ReservationDAO
             //Create a data reader and Execute the command
             MySqlDataReader dataReader = cmd.ExecuteReader();
             
-            //Read the data and store them in the list
+            //Read the data and store them in the dictionary
             while (dataReader.Read())
             {
                 ProductReservation["reservationId"] = dataReader["ReservationId"].ToString() + "";
@@ -140,6 +137,6 @@ public class ReservationDAO
 
     public int ReservationsCount()
     {
-        return CommonQueries.Count(Constants.ReservationsTableName);
+        return CommonQueries.Count(Constants.ReservationsTableName, reservationDAOConn);
     }
 }

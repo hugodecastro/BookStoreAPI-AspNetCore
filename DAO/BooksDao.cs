@@ -10,7 +10,7 @@ public class BookDAO : IProductDAO<Product>
 {
     private List<Product> booksList = new List<Product>();
     // Instance responsible for dealing with DB Connections
-    DbConnection? bookDAOConn;
+    DbConnection bookDAOConn = new DbConnection();
     
     //Insert statement
     public void Insert(int productCategoryMapId, string[] args)
@@ -21,7 +21,6 @@ public class BookDAO : IProductDAO<Product>
         /// <param name="args">List of fields to be inserted.</param>
         /// <returns>This method returns nothing.</returns>
 
-        bookDAOConn = new DbConnection();
         string query = $"INSERT INTO {Constants.BooksTableName} " + 
                         "(ProductCategoryMapId, YearPublished, Author) " +
                         $"VALUES({productCategoryMapId},";
@@ -47,13 +46,13 @@ public class BookDAO : IProductDAO<Product>
     
 
     //Update statement
-    public void UpdateByName(List<string> args, string name)
+    public void UpdateByName(List<string> args, string ProductName)
     {
         /// <summary>
         /// Update book by name.
         /// </summary>
         /// <param name="args">List of fields to be updated.</param>
-        /// <param name="name">Name of the book to be updated.</param>
+        /// <param name="ProductName">Name of the book to be updated.</param>
         /// <returns>This method returns nothing.</returns>
         /// <raises>MissingFieldException</raises>
 
@@ -62,7 +61,7 @@ public class BookDAO : IProductDAO<Product>
         {
             throw new MissingFieldException("Missing value to update!");
         }
-        bookDAOConn = new DbConnection();
+
         var regex = new Regex(Regex.Escape("0"));
         string query = $"UPDATE {Constants.BooksTableName} b" + 
                        $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " +
@@ -70,7 +69,7 @@ public class BookDAO : IProductDAO<Product>
                        $"RIGHT JOIN {Constants.ProductsTableName} p " +
                        "ON p.ProductId = pcm.ProductId " +
                        "SET p.ProductName='0', b.YearPublished='0', b.Author='0' " +
-                       $"WHERE p.ProductName='{name}'";
+                       $"WHERE p.ProductName LIKE '%{ProductName}%'";
 
         foreach(string field in args)
         {
@@ -85,18 +84,18 @@ public class BookDAO : IProductDAO<Product>
         }
         else
         {
-            Log.Error($"Couldn't update book {name}");
+            Log.Error($"Couldn't update book {ProductName}");
         }
         bookDAOConn.CloseConnection();
     }
 
     //Delete statement
-    public void Delete(string name)
+    public void Delete(string ProductName)
     {
         /// <summary>
         /// Delete book by name.
         /// </summary>
-        /// <param name="name">Name of the book to be deleted.</param>
+        /// <param name="ProductName">Name of the book to be deleted.</param>
         /// <returns>This method returns nothing.</returns>
 
         string query = $"DELETE FROM {Constants.BooksTableName} " + 
@@ -104,31 +103,29 @@ public class BookDAO : IProductDAO<Product>
                        "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
                        $"RIGHT JOIN {Constants.ProductsTableName} p " +
                        "ON p.ProductId = pcm.ProductId " +
-                       $"WHERE p.ProductName='{name}'";
-        bookDAOConn = new DbConnection();
+                       $"WHERE p.ProductName LIKE '%{ProductName}%'";
 
         if (bookDAOConn.OpenConnection())
         {
             bookDAOConn.ExecuteCommand(query);
-            Log.Information($"Book {name} deleted successfully!");
+            Log.Information($"Book {ProductName} deleted successfully!");
         }
         else
         {
-            Log.Error($"Couldn't delete book {name}");
+            Log.Error($"Couldn't delete book {ProductName}");
         }
         bookDAOConn.CloseConnection();
     }
 
     //Select statement
-    public Product SelectProductInfoByName(string name)
+    public Product SelectProductInfoByName(string ProductName)
     {
         /// <summary>
         /// Select book by name.
         /// </summary>
-        /// <param name="name">Name of the book to be selected.</param>
+        /// <param name="ProductName">Name of the book to be selected.</param>
         /// <returns>Book</returns>
 
-        bookDAOConn = new DbConnection();
         Book book = new Book();
         string query = "SELECT p.ProductId, p.ProductName, b.YearPublished, b.Author " +
                        $"FROM {Constants.ProductsTableName} p " + 
@@ -138,7 +135,7 @@ public class BookDAO : IProductDAO<Product>
                        "ON b.ProductCategoryMapId = pcm.ProductCategoryMapId " +
                        $"RIGHT JOIN {Constants.CategoriesTableName} c " + 
                        "ON c.CategoryId = pcm.CategoryId " +
-                       $"WHERE p.ProductName = '{name}' " + 
+                       $"WHERE p.ProductName LIKE '%{ProductName}%' " + 
                        "AND c.CategoryId = 1;";
 
         if (bookDAOConn.OpenConnection())
@@ -148,7 +145,6 @@ public class BookDAO : IProductDAO<Product>
             //Create a data reader and Execute the command
             MySqlDataReader dataReader = cmd.ExecuteReader();
             
-            //Read the data and store them in the list
             while (dataReader.Read())
             {
                 book.ProductId = (int) dataReader["ProductId"];
@@ -173,7 +169,6 @@ public class BookDAO : IProductDAO<Product>
         /// </summary>
         /// <returns>List of books.</returns>
 
-        bookDAOConn = new DbConnection();
         string query = "SELECT p.ProductId, p.ProductName, b.YearPublished, b.Author " +
                        $"FROM {Constants.ProductsTableName} p " + 
                        $"LEFT JOIN {Constants.ProductCategoryMapTableName} pcm " + 
@@ -214,6 +209,6 @@ public class BookDAO : IProductDAO<Product>
 
     public int ProductCount()
     {
-        return CommonQueries.Count(Constants.BooksTableName);
+        return CommonQueries.Count(Constants.BooksTableName, bookDAOConn);
     }
 }
